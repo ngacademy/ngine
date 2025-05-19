@@ -1,0 +1,31 @@
+{
+    "name": "ngine-dev",
+    "dockerFile": "Dockerfile",
+    "forwardPorts": [4200, 3333],
+    "postCreateCommand": "/usr/local/bin/entrypoint.sh && npm install",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "nrwl.angular-console",
+                "angular.ng-template",
+                "dbaeumer.vscode-eslint",
+                "esbenp.prettier-vscode",
+                "johnpapa.angular2",
+                "ms-vscode.vscode-typescript-next",
+                "firsttris.vscode-jest-runner",
+                "editorconfig.editorconfig"
+            ],
+            "settings": {
+                "editor.formatOnSave": true,
+                "editor.codeActionsOnSave": {
+                    "source.fixAll.eslint": "explicit"
+                },
+                "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+                "typescript.tsdk": "node_modules/typescript/lib"
+            }
+        }
+    },
+    "remoteUser": "node",
+    "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+    "workspaceFolder": "/workspace"
+}

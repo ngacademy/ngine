@@ -1,0 +1,3 @@
+project:
+  appName: "ngine-app" # my-app
+  libName: "ngine-lib" # my-lib

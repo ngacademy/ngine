@@ -1,0 +1,4 @@
+# This file's presence indicates debug mode
+# When this file exists, dev.js will not run automatically
+
+test: true
