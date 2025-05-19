@@ -1,0 +1,10 @@
+{
+  "name": "ngine-deps",
+  "version": "1.0.0",
+  "description": "Dependencies for ngine setup scripts",
+  "private": true,
+  "dependencies": {
+    "js-yaml": "^4.1.0",
+    "fs-extra": "^11.3.0"
+  }
+}

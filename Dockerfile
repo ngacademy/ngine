@@ -6,11 +6,12 @@ RUN corepack enable && corepack prepare pnpm@latest --activate \
     && apt-get update && apt-get install -y git
 
 # Create a directory to hold template assets
-RUN mkdir -p /ngine-assets
+RUN mkdir -p /ngine
 
-# Copy .devcontainer and .setup/templates into the image (assume these exist in build context)
-COPY .devcontainer /ngine-assets/.devcontainer
-COPY .setup/templates /ngine-assets/.setup/templates
+# Copy .devcontainer and .setup/templates into the default workspace
+COPY .devcontainer /workspace/ngine/.devcontainer
+COPY .setup/templates /workspace/ngine/.setup/configs
+COPY .setup/scripts /workspace/ngine/.setup/scripts
 
 # Copy entrypoint script
 COPY bin/entrypoint.sh /entrypoint.sh

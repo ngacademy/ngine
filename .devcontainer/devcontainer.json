@@ -1,8 +1,8 @@
 {
     "name": "ngine-dev",
     "dockerFile": "Dockerfile",
-    "forwardPorts": [4200, 3333],
-    "postCreateCommand": "/usr/local/bin/entrypoint.sh && npm install",
+    "forwardPorts": [4200],
+    "postCreateCommand": "/usr/local/bin/entrypoint.sh",
     "customizations": {
         "vscode": {
             "extensions": [

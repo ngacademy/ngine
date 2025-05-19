@@ -3,7 +3,6 @@ git:
     name: "" # your-name
     email: "" # your.email@example.com
   remote: "" # git@github.com:account/repo.git
-  defaultBranch: "main"
 
 project:
   appName: "" # my-app

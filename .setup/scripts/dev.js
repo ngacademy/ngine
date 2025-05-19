@@ -58,20 +58,76 @@ function validateGitConfig(config) {
     console.error('Remote URL should be in format git@github.com:account/repo.git or https://github.com/account/repo.git');
     process.exit(1);
   }
+}
+
+// Function to move project files to root
+function moveProject(projectDir, rootDir) {
+  if (!fs.existsSync(projectDir)) {
+    console.warn('Project directory not found. Skipping file movement.');
+    return false;
+  }
+
+  console.log('Moving project files to root directory...');
+  const files = fs.readdirSync(projectDir);
   
-  // Validate default branch
-  if (!config.git.defaultBranch) {
-    console.error('Error: Missing git default branch in workspace.yaml');
-    console.error('Please set a value for git.defaultBranch before continuing');
-    process.exit(1);
-  } else if (typeof config.git.defaultBranch !== 'string' || config.git.defaultBranch.trim() === '') {
-    console.error(`Error: Invalid git default branch: "${config.git.defaultBranch}"`);
-    console.error('Please set a valid branch name for git.defaultBranch before continuing');
-    process.exit(1);
+  for (const file of files) {
+    const srcPath = path.join(projectDir, file);
+    const destPath = path.join(rootDir, file);
+    
+    // Skip if the file already exists in the destination
+    if (fs.existsSync(destPath)) {
+      console.log(`Skipping ${file} as it already exists in destination`);
+      continue;
+    }
+    
+    // Move the file/directory
+    fs.moveSync(srcPath, destPath, { overwrite: false });
+    console.log(`Moved ${file} to root directory`);
+  }
+  
+  return true;
+}
+
+// Function to configure git settings
+function configGit(config) {
+  console.log('Configuring git settings...');
+  
+  try {
+    // Configure git username if valid
+    if (config.git?.user?.name && typeof config.git.user.name === 'string' && config.git.user.name.trim() !== '') {
+      console.log(`Setting git username to "${config.git.user.name}"`);
+      execSync(`git config user.name "${config.git.user.name}"`, { stdio: 'inherit' });
+    }
+    
+    // Configure git email if valid
+    if (config.git?.user?.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(config.git.user.email)) {
+      console.log(`Setting git email to "${config.git.user.email}"`);
+      execSync(`git config user.email "${config.git.user.email}"`, { stdio: 'inherit' });
+    }
+    
+    // Set up remote if provided and valid
+    if (config.git?.remote && typeof config.git.remote === 'string' && 
+        (config.git.remote.includes('git@') || config.git.remote.includes('https://'))) {
+      console.log(`Adding remote origin: ${config.git.remote}`);
+      
+      // Check if 'origin' remote already exists and update it
+      const remoteOutput = execSync('git remote').toString().trim();
+      if (remoteOutput.includes('origin')) {
+        console.log('Remote origin already exists, updating it...');
+        execSync(`git remote set-url origin ${config.git.remote}`, { stdio: 'inherit' });
+      } else {
+        execSync(`git remote add origin ${config.git.remote}`, { stdio: 'inherit' });
+      }
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error configuring git:', error.message);
+    return false;
   }
 }
 
-// Read and parse the workspace.yaml file
+// Main execution logic
 try {
   console.log('Reading configuration...');
   const configFile = fs.readFileSync(configPath, 'utf8');
@@ -80,66 +136,20 @@ try {
   // Validate git configuration
   validateGitConfig(config);
 
-  // Initialize git repository
-  console.log('Initializing git repository...');
-  
-  // Initialize git if .git directory doesn't exist
-  if (!fs.existsSync(path.join(rootDir, '.git'))) {
-    execSync('git init', { stdio: 'inherit' });
-    
-    // Only configure git if we have valid user information
-    if (config.git?.user) {
-      // Configure git based on workspace.yaml
-      if (config.git.user.name && typeof config.git.user.name === 'string' && config.git.user.name.trim() !== '') {
-        console.log(`Setting git username to "${config.git.user.name}"`);
-        execSync(`git config user.name "${config.git.user.name}"`, { stdio: 'inherit' });
-      }
-      
-      if (config.git.user.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(config.git.user.email)) {
-        console.log(`Setting git email to "${config.git.user.email}"`);
-        execSync(`git config user.email "${config.git.user.email}"`, { stdio: 'inherit' });
-      }
-    }
-    
-    // Set up remote if provided and valid
-    if (config.git?.remote && typeof config.git.remote === 'string' && 
-        (config.git.remote.includes('git@') || config.git.remote.includes('https://'))) {
-      console.log(`Adding remote origin: ${config.git.remote}`);
-      execSync(`git remote add origin ${config.git.remote}`, { stdio: 'inherit' });
-    }
-    
-    // Set default branch if provided and valid
-    if (config.git?.defaultBranch && typeof config.git.defaultBranch === 'string' && config.git.defaultBranch.trim() !== '') {
-      console.log(`Creating default branch: ${config.git.defaultBranch}`);
-      execSync(`git checkout -b ${config.git.defaultBranch}`, { stdio: 'inherit' });
-    }
-  } else {
-    console.log('Git repository already initialized');
-  }
-  
   // Move project files to root
-  if (fs.existsSync(projectDir)) {
-    console.log('Moving project files to root directory...');
-    const files = fs.readdirSync(projectDir);
+  const moveSuccessful = moveProject(projectDir, rootDir);
+  
+  // Configure git after moving the files
+  if (moveSuccessful) {
+    const gitConfigSuccess = configGit(config);
     
-    for (const file of files) {
-      const srcPath = path.join(projectDir, file);
-      const destPath = path.join(rootDir, file);
-      
-      // Skip if the file already exists in the destination
-      if (fs.existsSync(destPath)) {
-        console.log(`Skipping ${file} as it already exists in destination`);
-        continue;
-      }
-      
-      // Move the file/directory
-      fs.moveSync(srcPath, destPath, { overwrite: false });
-      console.log(`Moved ${file} to root directory`);
+    if (gitConfigSuccess) {
+      console.log('Project setup completed successfully!');
+    } else {
+      console.warn('Project setup completed with git configuration warnings.');
     }
-    
-    console.log('Project setup completed successfully!');
   } else {
-    console.warn('Project directory not found. Skipping file movement.');
+    console.warn('Project directory not found. Skipping file movement and git configuration.');
   }
   
 } catch (error) {

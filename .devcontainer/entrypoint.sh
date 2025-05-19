@@ -15,28 +15,25 @@ should_run_devjs() {
 
 echo "Starting container initialization..."
 
+# Set NODE_PATH to include our pre-installed dependencies
+DEPS_PATH="/usr/local/share/setup-deps/node_modules"
+
 # Run nx.js
-if [ -f "/workspace/bin/nx.js" ]; then
+if [ -f "/workspace/.setup/scripts/nx.js" ]; then
   echo "Running NX workspace setup..."
-  node /workspace/bin/nx.js
+  NODE_PATH="$DEPS_PATH" node /workspace/.setup/scripts/nx.js
 fi
 
 # Conditionally run dev.js
 if should_run_devjs; then
   echo "Running development environment setup..."
-  if [ -f "/workspace/bin/dev.js" ]; then
-    node /workspace/bin/dev.js
+  if [ -f "/workspace/.setup/scripts/dev.js" ]; then
+    NODE_PATH="$DEPS_PATH" node /workspace/.setup/scripts/dev.js
   else
     echo "Warning: dev.js script not found."
   fi
 else
   echo "Skipping dev.js setup (debug mode)"
-fi
-
-# Execute any commands passed to the script
-exec "$@"
-else
-  echo "Skipping dev.js setup (condition not met)"
 fi
 
 # Execute any commands passed to the script

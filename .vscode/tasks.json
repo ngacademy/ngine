@@ -4,7 +4,7 @@
     {
       "label": "ngine: Build Docker Image",
       "type": "shell",
-      "command": "docker build -t ngine:latest .",
+      "command": "docker build -t ngacademy/ngine:latest .",
       "group": {
         "kind": "build",
         "isDefault": true
@@ -15,5 +15,25 @@
       },
       "problemMatcher": []
     },
+    {
+      "label": "ngine: Docker Hub Login",
+      "type": "shell",
+      "command": "docker login -u ngacademy",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "ngine: Push Docker Image",
+      "type": "shell",
+      "command": "docker push ngacademy/ngine:latest",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "problemMatcher": []
+    }
   ]
 }
