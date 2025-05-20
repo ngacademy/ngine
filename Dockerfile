@@ -9,15 +9,15 @@ RUN corepack enable && corepack prepare pnpm@latest --activate \
 RUN mkdir -p /ngine
 
 # Copy .devcontainer and .setup/templates into the default workspace
-COPY .devcontainer /workspace/ngine/.devcontainer
-COPY .setup/templates /workspace/ngine/.setup/configs
-COPY .setup/scripts /workspace/ngine/.setup/scripts
+COPY .devcontainer /ngine/.devcontainer
+COPY .setup/templates /ngine/.setup/configs
+COPY .setup/scripts /ngine/.setup/scripts
 
 # Copy entrypoint script
 COPY bin/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-# Set default workspace mount point (for VSCode devcontainer)
+# Set default working directory
 WORKDIR /workspace
 
 # Entrypoint will scaffold the repo if needed

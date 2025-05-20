@@ -1,19 +1,25 @@
 #!/bin/sh
 set -e
 
-# Get target dir from first argument, return if not provided
+# Get repo name from first argument, return if not provided
 if [ -z "$1" ]; then
   echo "Error: No target directory provided."
   exit 1
 fi
-target_dir="$1"
-mkdir -p "$target_dir"
+REPO_NAME="$1"
+mkdir -p "$REPO_NAME"
 
 # Copy the ngine setup files to the target directory
-cp -r ngine/.devcontainer "$target_dir/.devcontainer"
-mkdir -p "$target_dir/.setup"
-cp -r ngine/.setup/templates "$target_dir/.setup/configs"
-cp -r ngine/.setup/scripts "$target_dir/.setup/scripts"
+ENTRYPOINT_SH="/ngine/.devcontainer/entrypoint.sh"
+sed -i "s/REPO_NAME=\"ngine\".*$/REPO_NAME=\"$REPO_NAME\"/" "$ENTRYPOINT_SH"
+cp -r /ngine/.devcontainer "$REPO_NAME/.devcontainer"
+mkdir -p "$REPO_NAME/.setup"
+cp -r /ngine/.setup/scripts "$REPO_NAME/.setup/scripts"
+cp -r /ngine/.setup/configs "$REPO_NAME/.setup/configs"
+
+# Create empty tmp/.gitkeep file for conditional logic
+mkdir -p "$REPO_NAME/tmp"
+touch "$REPO_NAME/tmp/.gitkeep"
 
 echo "Ngine init completed successfully!"
 

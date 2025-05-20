@@ -21,7 +21,7 @@ COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 # Set working directory
-WORKDIR /workspace
+WORKDIR /workspaces
 
 # The node user is provided by the base image
 USER node
