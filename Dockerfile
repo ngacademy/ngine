@@ -1,9 +1,11 @@
 # syntax=docker/dockerfile:1
-FROM node:22-bullseye
+FROM ubuntu:22.04
 
-# Install pnpm, git, and any other required tools
-RUN corepack enable && corepack prepare pnpm@latest --activate \
-    && apt-get update && apt-get install -y git
+# Install only git, which is essential
+RUN apt-get update && apt-get install -y \
+    git \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Create a directory to hold template assets
 RUN mkdir -p /ngine

@@ -6,10 +6,14 @@ if [ -z "$1" ]; then
   echo "Error: No target directory provided."
   exit 1
 fi
+
 REPO_NAME="$1"
-mkdir -p "$REPO_NAME"
+
+echo "- Starting repository initialization..."
+echo "Repository name: $REPO_NAME"
 
 # Copy the ngine setup files to the target directory
+mkdir -p "$REPO_NAME"
 ENTRYPOINT_SH="/ngine/.devcontainer/entrypoint.sh"
 sed -i "s/REPO_NAME=\"ngine\".*$/REPO_NAME=\"$REPO_NAME\"/" "$ENTRYPOINT_SH"
 cp -r /ngine/.devcontainer "$REPO_NAME/.devcontainer"
@@ -21,7 +25,7 @@ cp -r /ngine/.setup/configs "$REPO_NAME/.setup/configs"
 mkdir -p "$REPO_NAME/tmp"
 touch "$REPO_NAME/tmp/.gitkeep"
 
-echo "Ngine init completed successfully!"
+echo "- Repository initialization complete."
 
 # Shift the first argument so CMD works as expected
 shift

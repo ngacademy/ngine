@@ -1,8 +1,7 @@
 {
     "name": "ngine-dev",
-    "dockerFile": "Dockerfile",
-    "forwardPorts": [4200],
-    "postCreateCommand": "/usr/local/bin/entrypoint.sh",
+    "dockerFile": "Containerfile",
+    "postCreateCommand": "/ngine/setup.zsh",
     "customizations": {
         "vscode": {
             "extensions": [
@@ -21,7 +20,8 @@
                     "source.fixAll.eslint": "explicit"
                 },
                 "editor.defaultFormatter": "dbaeumer.vscode-eslint",
-                "typescript.tsdk": "node_modules/typescript/lib"
+                "typescript.tsdk": "node_modules/typescript/lib",
+                "terminal.integrated.defaultProfile.linux": "zsh"
             }
         }
     },

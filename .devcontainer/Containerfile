@@ -1,0 +1,19 @@
+FROM mcr.microsoft.com/devcontainers/typescript-node:22
+
+# install starship
+RUN curl -fsSL https://starship.rs/install.sh | sh -s -- -y
+RUN echo 'eval "$(starship init zsh)"' >> /home/node/.zshrc
+
+# setup deps
+COPY package.json /usr/local/share/setup-deps/
+RUN cd /usr/local/share/setup-deps && npm install --silent
+ENV DEPS_PATH=/usr/local/share/setup-deps/node_modules
+
+# setup entrypoint
+COPY setup.zsh /ngine/setup.zsh
+RUN chmod +x /ngine/setup.zsh
+
+# experimental
+ENV NODE_VERSION=22.12.0
+
+CMD ["/bin/zsh"]
