@@ -5,56 +5,30 @@
 If you're developing Ngine itself:
 
 ### Prerequisites
-- Docker
-- Node.js 18+
-- Git
+- docker
+- nodejs 22+
+- git
+- zsh
 
 ### Local Development
 
-1. Clone the repository:
+- Clone the repository:
    ```bash
    git clone https://github.com/ngacademy/ngine.git
    cd ngine
    ```
 
-2. Build the Docker image:
-   ```bash
-   docker build -t ngacademy/ngine:dev .
-   ```
+- Open the project in VS Code and install the recommended extensions.
 
-3. Test locally:
-   ```bash
-   docker run -v $(pwd)/test:/workspace ngacademy/ngine:dev scaffold
-   ```
+- Build the Docker image:
 
-## Docker Tasks
+   > run the task `ngine: Build Docker Image`
 
-Available VS Code tasks:
-- **Build Docker Image** - Builds the container locally
-- **Docker Hub Login** - Login to Docker Hub
-- **Push Docker Image** - Push to registry
-- **Clean** - Remove generated files
+- Test locally:
 
-## Testing
+   > toggle container mode by running the commands `Dev Containers: Reopen in Container` and `Dev Containers: Reopen Folder Locally` respectively.
 
-Run smoke tests:
-```bash
-./test/smoke.test.zsh
-```
+- Rebuild the container:
 
-## Release Process
+   > run the command `Dev Containers: Rebuild Container`
 
-1. Update version in relevant files
-2. Build and test locally
-3. Push to Docker Hub:
-   ```bash
-   docker build -t ngacademy/ngine:latest .
-   docker push ngacademy/ngine:latest
-   ```
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make changes and test
-4. Submit a pull request
