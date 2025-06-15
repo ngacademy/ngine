@@ -27,10 +27,6 @@ Ngine is a scaffolding tool that helps you quickly create new Angular projects w
 - **[Quick Start Guide](docs/quick-start.md)** - Get up and running in minutes
 - **[Configuration](docs/configuration.md)** - Customize your project setup
 
-## For Maintainers
-
-See the **[Maintainer Guide](docs/maintainer-guide.md)** for development and release instructions.
-
 ## License
 
 MIT

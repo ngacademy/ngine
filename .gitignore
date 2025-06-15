@@ -1,6 +1,11 @@
 node_modules
 tmp
-.copilot
+
+# dev
+.vscode
+.copilotignore
+.cursorignore
+
 
 # to be enabled
 lib
