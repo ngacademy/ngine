@@ -4,6 +4,9 @@ tmp
 # dev
 .vscode
 .copilotignore
+.github/instructions
+.github/prompts
+.github/copilot-instructions.md
 .cursorignore
 
 
