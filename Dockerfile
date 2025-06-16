@@ -1,29 +1,24 @@
 # syntax=docker/dockerfile:1
 FROM ubuntu:22.04
 
-# Install only git, which is essential
+# Install only essential packages
 RUN apt-get update && apt-get install -y \
-    git \
+    # git \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Create a directory to hold template assets
+# Create a directory to hold setup assets
 RUN mkdir -p /ngine
 
-# Copy .devcontainer and .setup/templates into the default workspace
+# Prepare setup assets
 COPY .devcontainer /ngine/.devcontainer
 COPY .setup/templates /ngine/.setup/configs
 COPY .setup/scripts /ngine/.setup/scripts
 
-# Copy entrypoint script
-COPY bin/entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+# Prepare setup script
+COPY bin/setup.sh /setup.sh
+RUN chmod +x /setup.sh
+ENTRYPOINT ["/setup.sh"]
 
 # Set default working directory
 WORKDIR /workspace
-
-# Entrypoint will scaffold the repo if needed
-ENTRYPOINT ["/entrypoint.sh"]
-
-# Default command (can be overridden)
-CMD ["/bin/sh"]

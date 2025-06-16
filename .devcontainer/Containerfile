@@ -10,8 +10,8 @@ RUN cd /usr/local/share/setup-deps && npm install --silent
 ENV DEPS_PATH=/usr/local/share/setup-deps/node_modules
 
 # setup entrypoint
-COPY setup.zsh /ngine/setup.zsh
-RUN chmod +x /ngine/setup.zsh
+COPY bin/init.zsh /ngine/init.zsh
+RUN chmod +x /ngine/init.zsh
 
 # experimental
 ENV NODE_VERSION=22.12.0
