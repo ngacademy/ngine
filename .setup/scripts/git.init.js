@@ -2,7 +2,7 @@ const fs = require('fs-extra');
 const yaml = require('js-yaml');
 const path = require('path');
 const { execSync } = require('child_process');
-const { shouldSkipDev } = require('./common.setup.js');
+const { shouldSkipDev } = require('./config.init.js');
 
 // Check if we should skip dev setup first
 if (shouldSkipDev()) {

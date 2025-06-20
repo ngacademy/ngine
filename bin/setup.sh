@@ -3,14 +3,14 @@ set -e
 
 # Get repo name from first argument, terminate setup script if not provided
 if [ -z "$1" ]; then
-  echo "[ngine] Error: No target directory provided."
+  echo "[setup] Error: No target directory provided."
   exit 1
 fi
 
 REPO_NAME="$1"
 
-echo "[ngine] Starting project repo setup..."
-echo "[ngine] Project repo name: $REPO_NAME"
+echo "[setup] > Starting project repo setup..."
+echo "[setup] Project repo name: $REPO_NAME"
 
 # Update the devcontainer init script with the provided repo name
 INIT_SCRIPT="/ngine/.devcontainer/scripts/init.zsh"
@@ -23,4 +23,4 @@ mkdir -p "$REPO_NAME/.setup"
 cp -r /ngine/.setup/scripts "$REPO_NAME/.setup/scripts"
 cp -r /ngine/.setup/configs "$REPO_NAME/.setup/configs"
 
-echo "[ngine] Project repo setup complete."
+echo "[setup] > Project repo setup complete."

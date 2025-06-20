@@ -1,33 +1,36 @@
 {
-    "name": "ngine-dev",
-    "dockerFile": "Containerfile",
-    "postCreateCommand": "/ngine/init.zsh",
-    "customizations": {
-        "vscode": {
-            // automatically installed in dev container
-            "extensions": [
-                "nrwl.angular-console",
-                "angular.ng-template",
-                "dbaeumer.vscode-eslint",
-                "esbenp.prettier-vscode",
-                "johnpapa.angular2",
-                "ms-vscode.vscode-typescript-next",
-                "firsttris.vscode-jest-runner",
-                "editorconfig.editorconfig"
-            ],
-            // override default settings, can be overridden by workspace settings
-            "settings": {
-                "editor.formatOnSave": true,
-                "editor.codeActionsOnSave": {
-                    "source.fixAll.eslint": "explicit"
-                },
-                "editor.defaultFormatter": "dbaeumer.vscode-eslint",
-                "typescript.tsdk": "node_modules/typescript/lib",
-                "terminal.integrated.defaultProfile.linux": "zsh"
-            }
-        }
-    },
-    // "remoteUser": "node",
-    "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/${localWorkspaceFolderBasename},type=bind,consistency=cached",
-    "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}"
+  "name": "ngine-dev",
+  "dockerFile": "Containerfile",
+  "postCreateCommand": "/ngine/init.zsh",
+  "customizations": {
+    "vscode": {
+      // automatically installed in dev container
+      "extensions": [
+        "nrwl.angular-console",
+        "angular.ng-template",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "johnpapa.angular2",
+        "ms-vscode.vscode-typescript-next",
+        "firsttris.vscode-jest-runner",
+        "editorconfig.editorconfig"
+      ],
+      // override default settings, can be overridden by workspace settings
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": "explicit"
+        },
+        "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+        "typescript.tsdk": "node_modules/typescript/lib",
+        "terminal.integrated.defaultProfile.linux": "zsh"
+      }
+    }
+  },
+  "remoteUser": "node",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/${localWorkspaceFolderBasename},type=bind,consistency=cached",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "mounts": [
+    "source=ngine-npm-global,target=/usr/local/share/npm-global,type=volume"
+  ]
 }

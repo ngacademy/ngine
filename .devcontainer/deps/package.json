@@ -5,6 +5,7 @@
   "private": true,
   "dependencies": {
     "js-yaml": "^4.1.0",
-    "fs-extra": "^11.3.0"
+    "fs-extra": "^11.3.0",
+    "camelize": "^1.0.1"
   }
 }

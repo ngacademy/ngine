@@ -13,9 +13,9 @@ if [ ! -d "$ROOT_DIR" ]; then
   exit 1
 fi
 
-echo "[ngine] Starting container initialization..."
-echo "[ngine] Repository name: $REPO_NAME"
-echo "[ngine] Root directory: $ROOT_DIR"
+echo "[init] Starting container initialization..."
+echo "[init] Repository name: $REPO_NAME"
+echo "[init] Root directory: $ROOT_DIR"
 
 # setup environment variables
 export ROOT_DIR
@@ -43,18 +43,18 @@ touch ".init/init.log"
 # ===================== JS =====================
 
 # setup npm
-echo "[ngine] Setting up npm configuration..."
-node $ROOT_DIR/.setup/scripts/npm.setup.js
+echo "[init] Running npm init script..."
+NODE_PATH=$DEPS_PATH node $ROOT_DIR/.setup/scripts/npm.init.js
 
 # # setup git
-# echo "[ngine] Setting up git configuration..."
-# NODE_PATH=$DEPS_PATH node $ROOT_DIR/.setup/scripts/git.setup.js
+# echo "[init] Running git initialization script..."
+# NODE_PATH=$DEPS_PATH node $ROOT_DIR/.setup/scripts/git.init.js
 
 # # setup nx
-# echo "[ngine] Setting up nx configuration..."
-# NODE_PATH=$DEPS_PATH node $ROOT_DIR/.setup/scripts/nx.setup.js
+# echo "[init] Running nx initialization script..."
+# NODE_PATH=$DEPS_PATH node $ROOT_DIR/.setup/scripts/nx.init.js
 
 # # run tests if configured
 # /ngine/test.zsh
 
-echo "[ngine] Container initialization complete."
+echo "[init] Container initialization complete."
