@@ -23,8 +23,4 @@ mkdir -p "$REPO_NAME/.setup"
 cp -r /ngine/.setup/scripts "$REPO_NAME/.setup/scripts"
 cp -r /ngine/.setup/configs "$REPO_NAME/.setup/configs"
 
-# Create .init folder to hold initialization marker files and logs
-mkdir -p "$REPO_NAME/.init"
-touch "$REPO_NAME/.init/init.log"
-
 echo "[ngine] Project repo setup complete."
