@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "description": "Dependencies for ngine setup scripts",
   "private": true,
+  "type": "commonjs",
   "dependencies": {
-    "js-yaml": "^4.1.0",
+    "camelize": "^1.0.1",
     "fs-extra": "^11.3.0",
-    "camelize": "^1.0.1"
+    "js-yaml": "^4.1.0"
   }
 }

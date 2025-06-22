@@ -2,11 +2,11 @@ const fs = require('fs');
 const yaml = require('js-yaml');
 const path = require('path');
 const { execSync } = require('child_process');
-const { shouldSkipDev } = require('./common.setup.js');
+const { shouldSkipInit } = require('./configs.init.js');
 
 // Check if we should skip dev setup first
-if (shouldSkipDev()) {
-  console.log('Skipping nx setup due to shouldSkipDev setting');
+if (shouldSkipInit) {
+  console.log('Skipping nx setup due to shouldSkipInit setting');
   process.exit(0);
 }
 

@@ -31,6 +31,7 @@
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/${localWorkspaceFolderBasename},type=bind,consistency=cached",
   "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
   "mounts": [
-    "source=ngine-npm-global,target=/usr/local/share/npm-global,type=volume"
+    "source=ngine-npm-global,target=/usr/local/share/npm-global,type=volume",
+    "source=ngine-npm-init,target=/usr/local/share/setup-deps,type=volume"
   ]
 }

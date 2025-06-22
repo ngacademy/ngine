@@ -6,8 +6,8 @@ RUN echo 'eval "$(starship init zsh)"' >> /home/node/.zshrc
 
 # setup deps
 COPY deps/package.json /usr/local/share/setup-deps/
-RUN cd /usr/local/share/setup-deps && npm install --silent
-ENV DEPS_PATH=/usr/local/share/setup-deps/node_modules
+COPY deps/deps.zsh /ngine/deps.zsh
+RUN chmod +x /ngine/deps.zsh
 
 # setup entrypoint
 COPY bin/init.zsh /ngine/init.zsh

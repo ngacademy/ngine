@@ -1,27 +1,35 @@
 const { execSync } = require('child_process');
-const fs = require('fs');
-const path = require('path');
-const { shouldSkipInit } = require('./config.init.js');
+const { existsSync } = require('fs');
+const { join } = require('path');
+const { shouldSkipInit } = require('./configs.init.js');
+
+// =================== INIT ===================
+
+switch (true) {
+  case shouldSkipInit:
+    console.log('[npm] # Skipping npm init script due to shouldSkipInit setting');
+    process.exit(0);
+}
 
 // =================== CONSTANTS ===================
 
 const ROOT_DIR = process.env.ROOT_DIR;
-const DEBUG_MODE = process.env.DEBUG_MODE;
 
-switch (true) {
-  case shouldSkipInit:
-    console.log('[npm] Skipping npm init script due to shouldSkipInit setting');
-    process.exit(0);
-}
+const GLOBAL_PACKAGES = [
+  'nx',
+  '@nrwl/cli'
+];
 
 // =================== FUNCTIONS ===================
 
 /**
- * Function to check if npm install -g should run
+ * Checks if npm install -g should run
  */
-function shouldIstallGlobalPackages() {
+function shouldInstallGlobalPackages() {
   try {
-    execSync(`npm list -g --depth=0 nx @nrwl/cli`, { stdio: 'ignore' });
+    execSync(`npm list -g --depth=0 ${GLOBAL_PACKAGES.join(' ')}`, {
+      stdio: 'ignore'
+    });
     console.log('[npm] ? nx already globally installed');
     return false;
   } catch {
@@ -33,35 +41,27 @@ function shouldIstallGlobalPackages() {
  * Installs global npm packages if needed
  */
 function installGlobalPackages() {
-  if (shouldIstallGlobalPackages()) {
-
-    console.log('[npm] Installing global npm packages...');
-    execSync(
-      "npm install -g \
-            nx \
-            @nrwl/cli \
-        ",
-      { stdio: 'inherit' }
-    );
-
-    console.log('[npm] Global npm packages installed successfully');
+  if (shouldInstallGlobalPackages()) {
+    console.log('[npm] > Installing global npm packages...');
+    execSync(`npm install -g ${GLOBAL_PACKAGES.join(' ')}`, { stdio: 'inherit' });
+    console.log('[npm] > Global npm packages installed successfully');
   } else {
-    console.log('[npm] Skipping npm install -g');
+    console.log('[npm] > Skipping npm install -g');
   }
 }
 
 /**
- * Function to check if npm install should run
+ * Checks if npm install should run
  */
 function shouldInstallLocalPackages() {
   // TODO remove
   return false;
 
-  const nodeModulesPath = path.join(ROOT_DIR, 'node_modules');
-  const hasNodeModules = fs.existsSync(nodeModulesPath);
+  const nodeModulesPath = join(ROOT_DIR, 'node_modules');
+  const hasNodeModules = existsSync(nodeModulesPath);
 
   switch (true) {
-    case DEBUG_MODE: {
+    case Boolean(DEBUG_MODE): {
       console.log("[npm] ? DEBUG_MODE is true");
       return false;
     }
@@ -81,25 +81,25 @@ function shouldInstallLocalPackages() {
  */
 function installLocalPackages() {
   if (shouldInstallLocalPackages()) {
-    console.log(`[npm] Installing local npm packages in ${ROOT_DIR}...`);
+    console.log(`[npm] > Installing local npm packages in ${ROOT_DIR}...`);
     execSync('npm install', {
       stdio: 'inherit',
       cwd: ROOT_DIR
     });
-    console.log('[npm] Local npm packages installed successfully');
+    console.log('[npm] > Local npm packages installed successfully');
   } else {
-    console.log('[npm] Skipping npm install');
+    console.log('[npm] > Skipping npm install');
   }
 }
 
 // ===================== MAIN ====================
 
 try {
-  console.log('[npm] > Starting npm init script ...');
+  console.log('[npm] - Starting npm init script ...');
   installGlobalPackages();
   installLocalPackages();
-  console.log('[npm] > npm init script completed successfully');
+  console.log('[npm] - npm init script completed successfully');
 } catch (error) {
-  console.error('[npm] ! Error during npm init script:', error);
+  console.error('[npm] ! npm init script failed:', error);
   process.exit(1);
 }

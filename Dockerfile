@@ -14,6 +14,7 @@ RUN mkdir -p /ngine
 COPY .devcontainer /ngine/.devcontainer
 COPY .setup/templates /ngine/.setup/configs
 COPY .setup/scripts /ngine/.setup/scripts
+COPY .setup/environment /ngine/.setup/environment
 
 # Prepare setup script
 COPY bin/setup.sh /setup.sh
