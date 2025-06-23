@@ -9,7 +9,7 @@ fi
 
 REPO_NAME="$1"
 
-echo "[setup] > Starting project repo setup..."
+echo "[setup] Starting project repo setup..."
 echo "[setup] Project repo name: $REPO_NAME"
 
 # Update the devcontainer init script with the provided repo name
@@ -24,4 +24,4 @@ cp -r /ngine/.setup/scripts "$REPO_NAME/.setup/scripts"
 cp -r /ngine/.setup/configs "$REPO_NAME/.setup/configs"
 cp -r /ngine/.setup/environment "$REPO_NAME/.setup/environment"
 
-echo "[setup] > Project repo setup complete."
+echo "[setup] Project repo setup complete."

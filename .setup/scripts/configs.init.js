@@ -1,5 +1,5 @@
 require('./logs.init.js');
-const fs = require('fs');
+const { existsSync, readFileSync } = require('fs');
 const path = require('path');
 const yaml = require('js-yaml');
 const camelize = require('camelize');
@@ -26,8 +26,8 @@ const CONFIG = camelize({
 function readYamlConfig(filename) {
   try {
     const filePath = path.join(CONFIGS_DIR, filename);
-    if (fs.existsSync(filePath)) {
-      const content = fs.readFileSync(filePath, 'utf8');
+    if (existsSync(filePath)) {
+      const content = readFileSync(filePath, 'utf8');
       return yaml.load(content);
     }
   } catch (error) {
@@ -79,7 +79,7 @@ function validateGitConfig(workspaceConfig) {
     process.exit(1);
   }
 
-  workspaceConfig.git = gitConfig;
+  CONFIG.git = gitConfig;
 }
 
 // ===================== EXPORT ====================

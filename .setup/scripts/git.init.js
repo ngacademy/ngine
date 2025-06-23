@@ -1,7 +1,6 @@
-const fs = require('fs');
-const yaml = require('js-yaml');
-const path = require('path');
+const { existsSync, writeFileSync } = require('fs');
 const { execSync } = require('child_process');
+const path = require('path');
 const { shouldSkipGit, config } = require('./configs.init.js');
 
 // =================== INIT ===================
@@ -27,7 +26,7 @@ function shouldInitGit() {
   const gitDirPath = path.join(ROOT_DIR, '.git');
   const hasGitDir = existsSync(gitDirPath);
 
-  const hasGitInitMarker = fs.existsSync(GIT_INIT_MARKER);
+  const hasGitInitMarker = existsSync(GIT_INIT_MARKER);
 
   switch (true) {
     case hasGitDir && hasGitInitMarker: {
@@ -61,7 +60,7 @@ function initGit() {
     });
     console.log(`[git] > Git remote origin set to ${config.git.remote}`);
 
-    fs.writeFileSync(GIT_INIT_MARKER, '');
+    writeFileSync(GIT_INIT_MARKER, '');
   } else {
     console.log('[git] > Skipping git init');
   }
@@ -71,7 +70,7 @@ function initGit() {
  * Checks if git user should be configured
  */
 function shouldConfigureGitUser() {
-  const hasGitUserMarker = fs.existsSync(GIT_USER_MARKER);
+  const hasGitUserMarker = existsSync(GIT_USER_MARKER);
 
   switch (true) {
     case hasGitUserMarker: {
@@ -103,7 +102,7 @@ function configureGitUser() {
     });
     console.log(`[git] > Git user email set to "${config.git.user.email}"`);
 
-    fs.writeFileSync(GIT_USER_MARKER, '');
+    writeFileSync(GIT_USER_MARKER, '');
   } else {
     console.log('[git] > Skipping git init');
   }
