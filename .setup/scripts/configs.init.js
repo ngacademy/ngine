@@ -82,17 +82,54 @@ function validateGitConfig(workspaceConfig) {
   CONFIG.git = gitConfig;
 }
 
+/**
+ * Validates nx configuration from workspace.yaml
+ * @param {object} workspaceConfig - workspace configuration object
+ */
+function validateNxConfig(workspaceConfig) {
+  if (!workspaceConfig || !workspaceConfig.project) {
+    console.error('[configs] ! Missing nx configuration object');
+    process.exit(1);
+  }
+
+  const nxConfig = workspaceConfig.project;
+
+  if (!nxConfig.appName) {
+    console.error('[configs] ! Missing nx app name');
+    process.exit(1);
+  } else if (typeof nxConfig.appName !== 'string' || nxConfig.appName.trim() === '') {
+    console.error('[configs] ! Nx app name must be a non-empty string');
+    process.exit(1);
+  }
+
+  if (!nxConfig.libName) {
+    console.error('[configs] ! Missing nx lib name');
+    process.exit(1);
+  } else if (typeof nxConfig.libName !== 'string' || nxConfig.libName.trim() === '') {
+    console.error('[configs] ! Nx lib name must be a non-empty string');
+    process.exit(1);
+  }
+
+  CONFIG.nx = nxConfig;
+}
+
 // ===================== EXPORT ====================
 
 const shouldSkipInit = Boolean(CONFIG.debug && CONFIG.debug.skipInit);
 const shouldSkipGit = DEBUG_MODE;
+const shouldSkipNx = false;
 
 if (!shouldSkipGit) {
   validateGitConfig(CONFIG.workspace);
+}
+
+if (!shouldSkipNx) {
+  validateNxConfig(CONFIG.workspace);
 }
 
 module.exports = {
   config: CONFIG,
   shouldSkipInit,
   shouldSkipGit,
+  shouldSkipNx,
 };

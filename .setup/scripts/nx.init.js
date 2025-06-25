@@ -1,156 +1,55 @@
-const fs = require('fs');
-const yaml = require('js-yaml');
-const path = require('path');
 const { execSync } = require('child_process');
-const { shouldSkipInit } = require('./configs.init.js');
+const {
+  existsSync,
+  readFileSync,
+  writeFileSync,
+  readdirSync,
+  renameSync,
+  rmdirSync,
+} = require('fs');
+const path = require('path');
+const { shouldSkipNx, config } = require('./configs.init.js');
 
-// Check if we should skip dev setup first
-if (shouldSkipInit) {
-  console.log('Skipping nx setup due to shouldSkipInit setting');
-  process.exit(0);
-}
+// =================== CONSTANTS ===================
 
-// Get ROOT_DIR from environment variables
 const ROOT_DIR = process.env.ROOT_DIR;
-const configPath = path.join(ROOT_DIR, '.setup', 'configs', 'workspace.yaml');
-const workspaceName = "project"; // Move to global scope
+const DEBUG_MODE = Boolean(Number(process.env.DEBUG_MODE));
+const WORKSPACE_NAME = "project";
+const WORKSPACE_DIR = path.join(ROOT_DIR, WORKSPACE_NAME);
+
+const NX_CREATE_MARKER = path.join(ROOT_DIR, '.init', '.nx-create');
+const NX_JSON_MARKER = path.join(ROOT_DIR, '.init', '.nx-json');
+const NX_MOVE_MARKER = path.join(ROOT_DIR, '.init', '.nx-move');
+
+// =================== FUNCTIONS ===================
 
 /**
- * Checks if nx.js should run
- * @returns {boolean} - True if nx.js should run, false otherwise
+ * Checks if the whole nx init script should be skipped
  */
-function shouldRunNxSetup() {
-  // First check if debug mode and no projects folder
-  if (fs.existsSync(path.join(ROOT_DIR, '.setup/configs/debug.yaml')) && !fs.existsSync(path.join(ROOT_DIR, 'projects'))) {
-    console.log('Debug mode detected and no projects folder, nx.js should run');
-    return true;
+function shouldSkipNxInit() {
+  const hasWorkspaceDir = existsSync(WORKSPACE_DIR);
+  const nxJsonPath = path.join(ROOT_DIR, 'nx.json');
+  const hasNxJson = existsSync(nxJsonPath);
+
+  switch (true) {
+    case shouldSkipNx:
+      console.log('[nx] # Skipping nx init script due to shouldSkipNx setting');
+      return true;
+    case DEBUG_MODE && hasWorkspaceDir:
+      console.log('[nx] # Skipping nx init script in debug mode since workspace directory already exists');
+      return true;
+    case hasNxJson:
+      console.log('[nx] # Skipping nx init script since nx.json already exists');
+      return true;
+    default:
+      return false;
   }
-
-  // Check if nx.json exists - if it does, don't run nx.js
-  if (!fs.existsSync(path.join(ROOT_DIR, 'nx.json'))) {
-    console.log('No nx.json found, nx.js should run');
-    return true;
-  }
-
-  // If nx.json exists, don't run nx.js
-  return false;
-}
-
-// Check if nx setup should run before proceeding
-if (!shouldRunNxSetup()) {
-  console.log('Nx setup not needed, exiting');
-  process.exit(0);
-}
-
-// Validate configuration
-function loadProjectConfig() {
-  console.log('Reading configuration...');
-  const configFile = fs.readFileSync(configPath, 'utf8');
-  const config = yaml.load(configFile);
-
-  if (!config.project) {
-    console.error('Error: Missing project configuration in workspace.yaml');
-    process.exit(1);
-  }
-
-  if (!config.project.appName) {
-    console.error('Error: Missing or empty appName in workspace.yaml');
-    console.error('Please set a value for project.appName before continuing');
-    process.exit(1);
-  }
-
-  if (!config.project.libName) {
-    console.error('Error: Missing or empty libName in workspace.yaml');
-    console.error('Please set a value for project.libName before continuing');
-    process.exit(1);
-  }
-
-  return config.project;
-}
-
-/**
- * Updates project.json file to add host configuration for dev containers
- */
-function updateProjectJson(appName) {
-  const projectJsonPath = path.join(ROOT_DIR, workspaceName, 'apps', appName, 'project.json');
-
-  if (!fs.existsSync(projectJsonPath)) {
-    console.error(`Error: Could not find project.json at ${projectJsonPath}`);
-    return;
-  }
-
-  console.log(`Updating project.json at ${projectJsonPath}...`);
-
-  // Read and parse the project.json file
-  const projectJson = JSON.parse(fs.readFileSync(projectJsonPath, 'utf8'));
-
-  // Add host option to serve configuration
-  if (projectJson.targets && projectJson.targets.serve) {
-    projectJson.targets.serve.options = projectJson.targets.serve.options || {};
-    projectJson.targets.serve.options.host = "0.0.0.0";
-    console.log('Added host option to serve configuration');
-  }
-
-  // Add host option to serve-static configuration if it exists
-  if (projectJson.targets && projectJson.targets['serve-static']) {
-    projectJson.targets['serve-static'].options = projectJson.targets['serve-static'].options || {};
-    projectJson.targets['serve-static'].options.host = "0.0.0.0";
-    console.log('Added host option to serve-static configuration');
-  }
-
-  // Write the updated JSON back to the file
-  fs.writeFileSync(projectJsonPath, JSON.stringify(projectJson, null, 2));
-}
-
-/**
- * Checks if the project directory exists and needs to be moved
- * @returns {boolean} - True if project directory exists and conditions allow movement
- */
-function shouldMoveProject() {
-  // Don't move project if in debug mode
-  if (fs.existsSync(path.join(ROOT_DIR, '.setup/configs/debug.yaml'))) {
-    console.log('Debug mode detected, skipping project move');
-    return false;
-  }
-
-  // Don't move if nx.json already exists in root
-  if (fs.existsSync(path.join(ROOT_DIR, 'nx.json'))) {
-    console.log('nx.json found in root, skipping project move');
-    return false;
-  }
-
-  // Only move if project directory exists
-  return fs.existsSync(path.join(ROOT_DIR, workspaceName));
-}
-
-/**
- * Moves project files to root directory
- * @returns {boolean} - True if move was successful
- */
-function moveProject() {
-  const projectDir = path.join(ROOT_DIR, workspaceName);
-  const files = fs.readdirSync(projectDir);
-
-  for (const file of files) {
-    if (file === '.git') continue;
-
-    const srcPath = path.join(projectDir, file);
-    const destPath = path.join(ROOT_DIR, file);
-
-    if (fs.existsSync(destPath)) continue;
-
-    fs.renameSync(srcPath, destPath);
-  }
-
-  fs.rmdirSync(projectDir, { recursive: true });
-  return true;
 }
 
 /**
  * Creates the NX workspace using the provided configuration
  */
-function createNxWorkspace(project) {
-  // NX workspace configuration constants (remove workspaceName redeclaration)
+function createNxWorkspace() {
   const preset = "angular-monorepo";
   const style = "scss";
   const bundler = "esbuild";
@@ -159,9 +58,8 @@ function createNxWorkspace(project) {
   const nxCloud = "skip";
   const packageManager = "npm";
 
-  // Build the create-nx-workspace command
-  const createWorkspaceCmd = `npx --yes create-nx-workspace@latest ${workspaceName} \
-    --appName=${project.appName} \
+  const createWorkspaceCmd = `npx --yes create-nx-workspace@latest ${WORKSPACE_NAME} \
+    --appName=${config.nx.appName} \
     --preset=${preset} \
     --bundler=${bundler} \
     --packageManager=${packageManager} \
@@ -175,39 +73,112 @@ function createNxWorkspace(project) {
     --no-interactive \
     --verbose`;
 
-  console.log('Creating workspace with command:');
-  console.log(createWorkspaceCmd);
+  console.log(`[nx] > Creating NX workspace with command: ${createWorkspaceCmd}`);
+  execSync(createWorkspaceCmd, {
+    stdio: 'inherit',
+    cwd: ROOT_DIR
+  });
+  console.log('[nx] > NX workspace created successfully');
 
-  // Create the NX workspace
-  execSync(createWorkspaceCmd, { stdio: 'inherit', cwd: ROOT_DIR });
-  console.log('Workspace scaffolding complete!');
+  writeFileSync(NX_CREATE_MARKER, '');
 }
 
 /**
- * Performs post-creation setup tasks
+ * Updates project.json file to add host configuration for dev containers
  */
-function performPostSetup(project) {
-  // Update project.json with host configuration
-  updateProjectJson(project.appName);
-  console.log('Project configuration updated successfully!');
+function updateNxProjectJson() {
+  const projectJsonPath = path.join(
+    ROOT_DIR,
+    WORKSPACE_NAME,
+    'apps',
+    config.nx.appName,
+    'project.json'
+  );
 
-  // Move project files if needed
-  if (shouldMoveProject()) {
-    console.log('Moving project files to root directory...');
-    moveProject();
-    console.log('Project files moved successfully');
+  if (!existsSync(projectJsonPath)) {
+    console.error(`[nx] ! Could not find project.json at ${projectJsonPath}`);
+    process.exit(1);
+  }
+
+  console.log(`[nx] > Updating project.json at ${projectJsonPath}...`);
+
+  // Read and parse the project.json file
+  const projectJson = JSON.parse(readFileSync(projectJsonPath, 'utf8'));
+
+  // Add host option to serve configuration
+  if (projectJson.targets && projectJson.targets.serve) {
+    projectJson.targets.serve.options = projectJson.targets.serve.options || {};
+    projectJson.targets.serve.options.host = "0.0.0.0";
+    console.log('[nx] > Added host option to serve configuration');
+  }
+
+  // Add host option to serve-static configuration if it exists
+  if (projectJson.targets && projectJson.targets['serve-static']) {
+    projectJson.targets['serve-static'].options = projectJson.targets['serve-static'].options || {};
+    projectJson.targets['serve-static'].options.host = "0.0.0.0";
+    console.log('[nx] > Added host option to serve-static configuration');
+  }
+
+  // Write the updated JSON back to the file
+  writeFileSync(projectJsonPath, JSON.stringify(projectJson, null, 2));
+
+  writeFileSync(NX_JSON_MARKER, '');
+}
+
+/**
+ * Checks if the project directory needs to be moved to root
+ */
+function shouldMoveNxProject() {
+  switch (true) {
+    case DEBUG_MODE: {
+      console.log("[git] ? debug mode detected");
+      return false;
+    }
+
+    default:
+      return true;
+  }
+}
+
+/**
+ * Moves the nx workspace to the root directory if needed
+ */
+function moveNxWorkspace() {
+  if (shouldMoveNxProject()) {
+    console.log('[nx] > Moving workspace files to root directory...');
+    const files = readdirSync(WORKSPACE_DIR);
+
+    for (const file of files) {
+      if (file === '.git') continue;
+
+      const srcPath = path.join(WORKSPACE_DIR, file);
+      const destPath = path.join(ROOT_DIR, file);
+
+      if (existsSync(destPath)) continue;
+
+      renameSync(srcPath, destPath);
+    }
+
+    rmdirSync(WORKSPACE_DIR, { recursive: true });
+    console.log('[nx] > Workspace files moved successfully');
+
+    writeFileSync(NX_MOVE_MARKER, '');
+  } else {
+    console.log('[nx] > Skipping workspace move');
   }
 }
 
 // ===================== MAIN ====================
 
-try {
-  console.log('Starting Nx workspace setup...');
-  const projectConfig = loadProjectConfig();
-  createNxWorkspace(projectConfig);
-  performPostSetup(projectConfig);
-  console.log('Nx workspace setup completed successfully!');
-} catch (error) {
-  console.error('Error during Nx workspace setup:', error);
-  process.exit(1);
+if (!shouldSkipNxInit()) {
+  try {
+    console.log('[nx] - Starting nx init script ...');
+    createNxWorkspace();
+    updateNxProjectJson();
+    moveNxWorkspace();
+    console.log('[nx] - nx init script completed successfully');
+  } catch (error) {
+    console.error('[nx] ! nx init script failed:', error);
+    process.exit(1);
+  }
 }

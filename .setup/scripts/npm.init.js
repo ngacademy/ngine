@@ -1,15 +1,7 @@
 const { execSync } = require('child_process');
 const { existsSync } = require('fs');
-const { join } = require('path');
+const path = require('path');
 const { shouldSkipInit } = require('./configs.init.js');
-
-// =================== INIT ===================
-
-switch (true) {
-  case shouldSkipInit:
-    console.log('[npm] # Skipping npm init script due to shouldSkipInit setting');
-    process.exit(0);
-}
 
 // =================== CONSTANTS ===================
 
@@ -20,7 +12,23 @@ const GLOBAL_PACKAGES = [
   '@nrwl/cli'
 ];
 
+const NPM_GLOBAL_MARKER = path.join(ROOT_DIR, '.init', '.npm-global');
+const NPM_LOCAL_MARKER = path.join(ROOT_DIR, '.init', '.npm-local');
+
 // =================== FUNCTIONS ===================
+
+/**
+ * Checks if the whole npm init script should be skipped
+ */
+function shouldSkipNpmInit() {
+  switch (true) {
+    case shouldSkipInit:
+      console.log('[npm] # Skipping npm init script due to shouldSkipInit setting');
+      return true;
+    default:
+      return false;
+  }
+}
 
 /**
  * Checks if npm install -g should run
@@ -45,6 +53,8 @@ function installGlobalPackages() {
     console.log('[npm] > Installing global npm packages...');
     execSync(`npm install -g ${GLOBAL_PACKAGES.join(' ')}`, { stdio: 'inherit' });
     console.log('[npm] > Global npm packages installed successfully');
+
+    writeFileSync(NPM_GLOBAL_MARKER, '');
   } else {
     console.log('[npm] > Skipping npm install -g');
   }
@@ -87,6 +97,8 @@ function installLocalPackages() {
       cwd: ROOT_DIR
     });
     console.log('[npm] > Local npm packages installed successfully');
+
+    writeFileSync(NPM_LOCAL_MARKER, '');
   } else {
     console.log('[npm] > Skipping npm install');
   }
@@ -94,12 +106,14 @@ function installLocalPackages() {
 
 // ===================== MAIN ====================
 
-try {
-  console.log('[npm] - Starting npm init script ...');
-  installGlobalPackages();
-  installLocalPackages();
-  console.log('[npm] - npm init script completed successfully');
-} catch (error) {
-  console.error('[npm] ! npm init script failed:', error);
-  process.exit(1);
+if (!shouldSkipNpmInit()) {
+  try {
+    console.log('[npm] - Starting npm init script ...');
+    installGlobalPackages();
+    installLocalPackages();
+    console.log('[npm] - npm init script completed successfully');
+  } catch (error) {
+    console.error('[npm] ! npm init script failed:', error);
+    process.exit(1);
+  }
 }

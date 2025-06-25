@@ -3,21 +3,27 @@ const { execSync } = require('child_process');
 const path = require('path');
 const { shouldSkipGit, config } = require('./configs.init.js');
 
-// =================== INIT ===================
-
-switch (true) {
-  case shouldSkipGit:
-    console.log('[git] # Skipping git init script due to shouldSkipGit setting');
-    process.exit(0);
-}
-
 // =================== CONSTANTS ===================
 
 const ROOT_DIR = process.env.ROOT_DIR;
+
 const GIT_INIT_MARKER = path.join(ROOT_DIR, '.init', '.git-init');
 const GIT_USER_MARKER = path.join(ROOT_DIR, '.init', '.git-user');
 
 // =================== FUNCTIONS ===================
+
+/**
+ * Checks if the whole git init script should be skipped
+ */
+function shouldSkipGitInit() {
+  switch (true) {
+    case shouldSkipGit:
+      console.log('[git] # Skipping git init script due to shouldSkipGit setting');
+      return true;
+    default:
+      return false;
+  }
+}
 
 /**
  * Checks if git should be initialized
@@ -26,11 +32,9 @@ function shouldInitGit() {
   const gitDirPath = path.join(ROOT_DIR, '.git');
   const hasGitDir = existsSync(gitDirPath);
 
-  const hasGitInitMarker = existsSync(GIT_INIT_MARKER);
-
   switch (true) {
-    case hasGitDir && hasGitInitMarker: {
-      console.log("[git] ? .git directory and .git-init marker already exist");
+    case hasGitDir: {
+      console.log("[git] ? .git directory already exists");
       return false;
     }
 
@@ -110,12 +114,14 @@ function configureGitUser() {
 
 // ===================== MAIN ====================
 
-try {
-  console.log('[git] - Starting git init script ...');
-  initGit();
-  configureGitUser();
-  console.log('[git] - git init script completed successfully');
-} catch (error) {
-  console.error('[git] ! git init script failed:', error);
-  process.exit(1);
+if (!shouldSkipGitInit()) {
+  try {
+    console.log('[git] - Starting git init script ...');
+    initGit();
+    configureGitUser();
+    console.log('[git] - git init script completed successfully');
+  } catch (error) {
+    console.error('[git] ! git init script failed:', error);
+    process.exit(1);
+  }
 }
