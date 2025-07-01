@@ -5,5 +5,5 @@ git:
   remote: "" # git@github.com:account/repo.git
 
 project:
-  appName: "" # my-app
-  libName: "" # my-lib
+  app-name: "" # my-app
+  lib-name: "" # my-lib

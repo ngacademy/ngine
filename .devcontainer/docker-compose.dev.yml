@@ -1,0 +1,15 @@
+version: "3.9"
+services:
+  ngine:
+    volumes:
+      - ngine-npm-global:/usr/local/share/npm-global
+      - ngine-npm-init:/usr/local/share/setup-deps
+      - ngine-nx-project:/workspaces/ngine/project
+
+volumes:
+  ngine-npm-global:
+    name: ngine-npm-global
+  ngine-npm-init:
+    name: ngine-npm-init
+  ngine-nx-project:
+    name: ngine-nx-project

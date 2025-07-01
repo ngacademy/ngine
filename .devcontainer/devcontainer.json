@@ -1,10 +1,14 @@
 {
   "name": "ngine-dev",
-  "dockerFile": "Containerfile",
+  "dockerComposeFile": [
+    "docker-compose.yml",
+    "docker-compose.dev.yml"
+  ],
+  "service": "ngine",
   "postCreateCommand": "/ngine/init.zsh",
+  "overrideCommand": true,
   "customizations": {
     "vscode": {
-      // automatically installed in dev container
       "extensions": [
         "nrwl.angular-console",
         "angular.ng-template",
@@ -15,7 +19,6 @@
         "firsttris.vscode-jest-runner",
         "editorconfig.editorconfig"
       ],
-      // override default settings, can be overridden by workspace settings
       "settings": {
         "editor.formatOnSave": true,
         "editor.codeActionsOnSave": {
@@ -28,10 +31,5 @@
     }
   },
   "remoteUser": "node",
-  "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/${localWorkspaceFolderBasename},type=bind,consistency=cached",
-  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
-  "mounts": [
-    "source=ngine-npm-global,target=/usr/local/share/npm-global,type=volume",
-    "source=ngine-npm-init,target=/usr/local/share/setup-deps,type=volume"
-  ]
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}"
 }

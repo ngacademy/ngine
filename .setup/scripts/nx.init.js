@@ -14,6 +14,7 @@ const { shouldSkipNx, config } = require('./configs.init.js');
 
 const ROOT_DIR = process.env.ROOT_DIR;
 const DEBUG_MODE = Boolean(Number(process.env.DEBUG_MODE));
+const DEV_FLAG = Boolean(Number(process.env.DEV_FLAG));
 const WORKSPACE_NAME = "project";
 const WORKSPACE_DIR = path.join(ROOT_DIR, WORKSPACE_NAME);
 
@@ -28,6 +29,7 @@ const NX_MOVE_MARKER = path.join(ROOT_DIR, '.init', '.nx-move');
  */
 function shouldSkipNxInit() {
   const hasWorkspaceDir = existsSync(WORKSPACE_DIR);
+  const isWorkspaceDirEmpty = hasWorkspaceDir && readdirSync(WORKSPACE_DIR).length === 0;
   const nxJsonPath = path.join(ROOT_DIR, 'nx.json');
   const hasNxJson = existsSync(nxJsonPath);
 
@@ -35,14 +37,29 @@ function shouldSkipNxInit() {
     case shouldSkipNx:
       console.log('[nx] # Skipping nx init script due to shouldSkipNx setting');
       return true;
-    case DEBUG_MODE && hasWorkspaceDir:
+    case DEBUG_MODE && hasWorkspaceDir && !isWorkspaceDirEmpty:
       console.log('[nx] # Skipping nx init script in debug mode since workspace directory already exists');
       return true;
     case hasNxJson:
       console.log('[nx] # Skipping nx init script since nx.json already exists');
       return true;
+
     default:
       return false;
+  }
+}
+
+/**
+ * Checks if the NX workspace should be created
+ */
+function shouldCreateNxWorkspace() {
+  switch (true) {
+    case DEV_FLAG:
+      console.log('[nx] ? dev flag detected');
+      return false;
+
+    default:
+      return true;
   }
 }
 
@@ -50,6 +67,11 @@ function shouldSkipNxInit() {
  * Creates the NX workspace using the provided configuration
  */
 function createNxWorkspace() {
+  if (!shouldCreateNxWorkspace()) {
+    console.log('[nx] > Skipping NX workspace creation');
+    return;
+  }
+
   const preset = "angular-monorepo";
   const style = "scss";
   const bundler = "esbuild";
@@ -71,6 +93,7 @@ function createNxWorkspace() {
     --ssr \
     --serverRouting \
     --no-interactive \
+    --skipGit \
     --verbose`;
 
   console.log(`[nx] > Creating NX workspace with command: ${createWorkspaceCmd}`);
@@ -84,9 +107,28 @@ function createNxWorkspace() {
 }
 
 /**
+ * Checks if the NX workspace should be created
+ */
+function shouldUpdateNxProjectJson() {
+  switch (true) {
+    case DEV_FLAG:
+      console.log('[nx] ? dev flag detected');
+      return false;
+
+    default:
+      return true;
+  }
+}
+
+/**
  * Updates project.json file to add host configuration for dev containers
  */
 function updateNxProjectJson() {
+  if (!shouldUpdateNxProjectJson()) {
+    console.log('[nx] > Skipping NX project.json update');
+    return;
+  }
+
   const projectJsonPath = path.join(
     ROOT_DIR,
     WORKSPACE_NAME,
@@ -131,7 +173,7 @@ function updateNxProjectJson() {
 function shouldMoveNxProject() {
   switch (true) {
     case DEBUG_MODE: {
-      console.log("[git] ? debug mode detected");
+      console.log("[nx] ? debug mode detected");
       return false;
     }
 
@@ -145,22 +187,48 @@ function shouldMoveNxProject() {
  */
 function moveNxWorkspace() {
   if (shouldMoveNxProject()) {
-    console.log('[nx] > Moving workspace files to root directory...');
-    const files = readdirSync(WORKSPACE_DIR);
+    if (DEV_FLAG) {
+      console.log('[nx] > Dev flag detected - creating symlinks with stow...');
 
-    for (const file of files) {
-      if (file === '.git') continue;
+      execSync(`stow -t .. .`, {
+        stdio: 'inherit',
+        cwd: WORKSPACE_DIR
+      });
 
-      const srcPath = path.join(WORKSPACE_DIR, file);
-      const destPath = path.join(ROOT_DIR, file);
+      console.log('[nx] > Symlinks created successfully with stow');
 
-      if (existsSync(destPath)) continue;
+      execSync(`ln -s project/.gitignore .gitignore`, {
+        stdio: 'inherit',
+        cwd: ROOT_DIR
+      });
 
-      renameSync(srcPath, destPath);
+      const gitignorePath = path.join(ROOT_DIR, '.gitignore');
+      let content = readFileSync(gitignorePath, 'utf8');
+
+      if (!content.includes('\nproject\n')) {
+        content += '\nproject\n';
+        writeFileSync(gitignorePath, content);
+      }
+
+      console.log('[nx] > .gitignore symlink created successfully with ln');
+    } else {
+      console.log('[nx] > Moving workspace files to root directory...');
+      const files = readdirSync(WORKSPACE_DIR);
+
+      for (const file of files) {
+        if (file === '.git') continue;
+
+        const srcPath = path.join(WORKSPACE_DIR, file);
+        const destPath = path.join(ROOT_DIR, file);
+
+        if (existsSync(destPath)) continue;
+
+        renameSync(srcPath, destPath);
+      }
+
+      rmdirSync(WORKSPACE_DIR, { recursive: true });
+      console.log('[nx] > Workspace files moved successfully');
     }
-
-    rmdirSync(WORKSPACE_DIR, { recursive: true });
-    console.log('[nx] > Workspace files moved successfully');
 
     writeFileSync(NX_MOVE_MARKER, '');
   } else {

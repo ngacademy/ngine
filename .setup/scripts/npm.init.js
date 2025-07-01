@@ -1,5 +1,5 @@
 const { execSync } = require('child_process');
-const { existsSync } = require('fs');
+const { writeFileSync } = require('fs');
 const path = require('path');
 const { shouldSkipInit } = require('./configs.init.js');
 
@@ -13,7 +13,6 @@ const GLOBAL_PACKAGES = [
 ];
 
 const NPM_GLOBAL_MARKER = path.join(ROOT_DIR, '.init', '.npm-global');
-const NPM_LOCAL_MARKER = path.join(ROOT_DIR, '.init', '.npm-local');
 
 // =================== FUNCTIONS ===================
 
@@ -25,6 +24,7 @@ function shouldSkipNpmInit() {
     case shouldSkipInit:
       console.log('[npm] # Skipping npm init script due to shouldSkipInit setting');
       return true;
+
     default:
       return false;
   }
@@ -49,59 +49,16 @@ function shouldInstallGlobalPackages() {
  * Installs global npm packages if needed
  */
 function installGlobalPackages() {
-  if (shouldInstallGlobalPackages()) {
-    console.log('[npm] > Installing global npm packages...');
-    execSync(`npm install -g ${GLOBAL_PACKAGES.join(' ')}`, { stdio: 'inherit' });
-    console.log('[npm] > Global npm packages installed successfully');
-
-    writeFileSync(NPM_GLOBAL_MARKER, '');
-  } else {
+  if (!shouldInstallGlobalPackages()) {
     console.log('[npm] > Skipping npm install -g');
+    return;
   }
-}
 
-/**
- * Checks if npm install should run
- */
-function shouldInstallLocalPackages() {
-  // TODO remove
-  return false;
+  console.log('[npm] > Installing global npm packages...');
+  execSync(`npm install -g ${GLOBAL_PACKAGES.join(' ')}`, { stdio: 'inherit' });
+  console.log('[npm] > Global npm packages installed successfully');
 
-  const nodeModulesPath = join(ROOT_DIR, 'node_modules');
-  const hasNodeModules = existsSync(nodeModulesPath);
-
-  switch (true) {
-    case Boolean(DEBUG_MODE): {
-      console.log("[npm] ? DEBUG_MODE is true");
-      return false;
-    }
-
-    case hasNodeModules: {
-      console.log("[npm] ? node_modules dir already exists");
-      return false;
-    }
-
-    default:
-      return true;
-  }
-}
-
-/**
- * Runs local npm install if needed
- */
-function installLocalPackages() {
-  if (shouldInstallLocalPackages()) {
-    console.log(`[npm] > Installing local npm packages in ${ROOT_DIR}...`);
-    execSync('npm install', {
-      stdio: 'inherit',
-      cwd: ROOT_DIR
-    });
-    console.log('[npm] > Local npm packages installed successfully');
-
-    writeFileSync(NPM_LOCAL_MARKER, '');
-  } else {
-    console.log('[npm] > Skipping npm install');
-  }
+  writeFileSync(NPM_GLOBAL_MARKER, '');
 }
 
 // ===================== MAIN ====================
@@ -110,7 +67,6 @@ if (!shouldSkipNpmInit()) {
   try {
     console.log('[npm] - Starting npm init script ...');
     installGlobalPackages();
-    installLocalPackages();
     console.log('[npm] - npm init script completed successfully');
   } catch (error) {
     console.error('[npm] ! npm init script failed:', error);

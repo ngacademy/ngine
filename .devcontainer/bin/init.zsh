@@ -32,6 +32,9 @@ echo "$MSG" | tee -a .init/init.log
 sudo chown -R node:node /usr/local/share/setup-deps
 /ngine/deps.zsh
 
+# give access to the workspace directory
+sudo chown -R node:node /workspaces/$REPO_NAME/project
+
 # setup environment variables
 export ROOT_DIR
 export NODE_PATH="/usr/local/share/setup-deps/node_modules"
@@ -41,6 +44,12 @@ if [ -f "$ROOT_DIR/.setup/configs/debug.yaml" ]; then
   touch ".init/.debug-mode"
 else
   export DEBUG_MODE=0
+fi
+
+# run dev flag logic
+if [ -f "$ROOT_DIR/.devcontainer/docker-compose.dev.yml" ]; then
+  export DEV_FLAG=1
+  touch ".init/.dev-flag"
 fi
 
 # ===================== SHELL =====================

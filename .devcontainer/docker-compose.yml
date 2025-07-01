@@ -1,0 +1,8 @@
+version: "3.9"
+services:
+  ngine:
+    build:
+      context: .
+      dockerfile: Containerfile
+    volumes:
+      - ../:/workspaces/ngine:cached

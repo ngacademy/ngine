@@ -1,0 +1,9 @@
+git:
+  user:
+    name: "ngarchitect"
+    email: "ng.academy.official@gmail.com"
+  remote: "git@ngacademy.github.com:ngarchitect/test.git"
+
+project:
+  app-name: "dev-app"
+  lib-name: "dev-lib"

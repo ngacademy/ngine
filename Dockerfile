@@ -12,7 +12,7 @@ RUN mkdir -p /ngine
 
 # Prepare setup assets
 COPY .devcontainer /ngine/.devcontainer
-COPY .setup/templates /ngine/.setup/configs
+COPY .setup/configs /ngine/.setup/configs
 COPY .setup/scripts /ngine/.setup/scripts
 COPY .setup/environment /ngine/.setup/environment
 

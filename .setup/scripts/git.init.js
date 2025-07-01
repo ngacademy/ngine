@@ -20,6 +20,7 @@ function shouldSkipGitInit() {
     case shouldSkipGit:
       console.log('[git] # Skipping git init script due to shouldSkipGit setting');
       return true;
+
     default:
       return false;
   }
@@ -48,26 +49,27 @@ function shouldInitGit() {
  * includes git init and git remote setup
  */
 function initGit() {
-  if (shouldInitGit()) {
-    console.log(`[git] > Initializing git repository in ${ROOT_DIR}...`);
-
-    execSync('git init -b main', {
-      stdio: 'inherit',
-      cwd: ROOT_DIR
-    });
-    console.log('[git] > Git repository initialized successfully');
-
-    console.log(`[git] > Initializing git remote in ${ROOT_DIR}...`);
-    execSync(`git remote add origin ${config.git.remote}`, {
-      stdio: 'inherit',
-      cwd: ROOT_DIR
-    });
-    console.log(`[git] > Git remote origin set to ${config.git.remote}`);
-
-    writeFileSync(GIT_INIT_MARKER, '');
-  } else {
+  if (!shouldInitGit()) {
     console.log('[git] > Skipping git init');
+    return;
   }
+
+  console.log(`[git] > Initializing git repository in ${ROOT_DIR}...`);
+
+  execSync('git init -b main', {
+    stdio: 'inherit',
+    cwd: ROOT_DIR
+  });
+  console.log('[git] > Git repository initialized successfully');
+
+  console.log(`[git] > Initializing git remote in ${ROOT_DIR}...`);
+  execSync(`git remote add origin ${config.git.remote}`, {
+    stdio: 'inherit',
+    cwd: ROOT_DIR
+  });
+  console.log(`[git] > Git remote origin set to ${config.git.remote}`);
+
+  writeFileSync(GIT_INIT_MARKER, '');
 }
 
 /**
@@ -91,25 +93,26 @@ function shouldConfigureGitUser() {
  * Configures git user name and email if needed
  */
 function configureGitUser() {
-  if (shouldConfigureGitUser()) {
-    console.log(`[git] > Configuring git user in ${ROOT_DIR}...`);
-
-    execSync(`git config user.name "${config.git.user.name}"`, {
-      stdio: 'inherit',
-      cwd: ROOT_DIR
-    });
-    console.log(`[git] > Git user name set to "${config.git.user.name}"`);
-
-    execSync(`git config user.email "${config.git.user.email}"`, {
-      stdio: 'inherit',
-      cwd: ROOT_DIR
-    });
-    console.log(`[git] > Git user email set to "${config.git.user.email}"`);
-
-    writeFileSync(GIT_USER_MARKER, '');
-  } else {
-    console.log('[git] > Skipping git init');
+  if (!shouldConfigureGitUser()) {
+    console.log('[git] > Skipping git user configuration');
+    return;
   }
+
+  console.log(`[git] > Configuring git user in ${ROOT_DIR}...`);
+
+  execSync(`git config user.name "${config.git.user.name}"`, {
+    stdio: 'inherit',
+    cwd: ROOT_DIR
+  });
+  console.log(`[git] > Git user name set to "${config.git.user.name}"`);
+
+  execSync(`git config user.email "${config.git.user.email}"`, {
+    stdio: 'inherit',
+    cwd: ROOT_DIR
+  });
+  console.log(`[git] > Git user email set to "${config.git.user.email}"`);
+
+  writeFileSync(GIT_USER_MARKER, '');
 }
 
 // ===================== MAIN ====================
