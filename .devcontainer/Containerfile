@@ -1,21 +1,42 @@
+FROM gcr.io/google.com/cloudsdktool/google-cloud-cli:stable AS gcloud
 FROM mcr.microsoft.com/devcontainers/typescript-node:22
 
-# Install only essential packages
+# ===================== LINUX PACKAGES =====================
+
 RUN apt-get update && apt-get install -y \
     stow \
+    python3 \
+    python3-pip \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
+# ===================== GCLOUD =====================
+
+# Copy gcloud from official image
+COPY --from=gcloud /usr/lib/google-cloud-sdk /usr/lib/google-cloud-sdk
+
+# Set up environment
+ENV PATH="${PATH}:/usr/lib/google-cloud-sdk/bin"
+ENV CLOUDSDK_PYTHON="/usr/bin/python3"
+
+# Optional: Set up gcloud config directory
+RUN mkdir -p /home/node/.config/gcloud && \
+    chown -R node:node /home/node/.config
+
+# ===================== SHELL PROMPT =====================
 
 # install starship
 RUN curl -fsSL https://starship.rs/install.sh | sh -s -- -y
 RUN echo 'eval "$(starship init zsh)"' >> /home/node/.zshrc
 
-# setup deps
+# ===================== JS DEPS =====================
+
 COPY deps/package.json /usr/local/share/setup-deps/
 COPY deps/deps.zsh /ngine/deps.zsh
 RUN chmod +x /ngine/deps.zsh
 
-# setup entrypoint
+# ===================== ENTRYPOINT =====================
+
 COPY bin/init.zsh /ngine/init.zsh
 RUN chmod +x /ngine/init.zsh
 

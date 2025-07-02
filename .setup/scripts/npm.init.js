@@ -9,7 +9,8 @@ const ROOT_DIR = process.env.ROOT_DIR;
 
 const GLOBAL_PACKAGES = [
   'nx',
-  '@nrwl/cli'
+  '@nrwl/cli',
+  'firebase-tools',
 ];
 
 const NPM_GLOBAL_MARKER = path.join(ROOT_DIR, '.init', '.npm-global');
@@ -35,13 +36,23 @@ function shouldSkipNpmInit() {
  */
 function shouldInstallGlobalPackages() {
   try {
-    execSync(`npm list -g --depth=0 ${GLOBAL_PACKAGES.join(' ')}`, {
-      stdio: 'ignore'
+    const output = execSync(`npm list -g --depth=0 ${GLOBAL_PACKAGES.join(' ')}`, {
+      encoding: 'utf8'
     });
-    console.log('[npm] ? nx already globally installed');
-    return false;
+
+    // Check if all packages are actually listed in the output
+    const allPackagesInstalled = GLOBAL_PACKAGES.every(pkg =>
+      output.includes(pkg)
+    );
+
+    if (allPackagesInstalled) {
+      console.log('[npm] ? All global packages already installed');
+      return false;
+    } else {
+      return true;
+    }
   } catch {
-    return true
+    return true;
   }
 }
 
