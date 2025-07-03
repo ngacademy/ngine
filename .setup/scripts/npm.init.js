@@ -7,16 +7,18 @@ const { shouldSkipInit } = require('./configs.init.js');
 
 const ROOT_DIR = process.env.ROOT_DIR;
 
+const NODE_TARGET_VERSION = '22.15.0';
 const NPM_TARGET_VERSION = '11.4.2';
 
 const GLOBAL_PACKAGES = [
   'nx',
   '@nrwl/cli',
   'firebase-tools',
-  '@bitwarden/cli',
 ];
 
+const NPM_NODE_MARKER = path.join(ROOT_DIR, '.init', '.npm-node');
 const NPM_GLOBAL_MARKER = path.join(ROOT_DIR, '.init', '.npm-global');
+const NPM_PACKAGES_MARKER = path.join(ROOT_DIR, '.init', '.npm-packages');
 
 // =================== FUNCTIONS ===================
 
@@ -31,6 +33,59 @@ function shouldSkipNpmInit() {
 
     default:
       return false;
+  }
+}
+
+/**
+ * Checks if a particular version of node.js needs to be installed via nvm
+ */
+function shouldInstallNodeNvm() {
+  try {
+    const currentVersion = execSync('node --version', {
+      encoding: 'utf8'
+    }).trim().replace('v', '');
+
+    if (currentVersion === NODE_TARGET_VERSION) {
+      console.log(`[npm] ? Node.js is already at target version (${currentVersion})`);
+      return false;
+    } else {
+      return true;
+    }
+  } catch (error) {
+    return true;
+  }
+}
+
+
+/**
+ * Installs a particular version of node.js via nvm
+ */
+function installNodeNvm() {
+  if (!shouldInstallNodeNvm()) {
+    console.log('[npm] > Skipping node.js installation');
+    return;
+  }
+
+  console.log(`[npm] > Installing node.js ${NODE_TARGET_VERSION} via nvm...`);
+
+  try {
+    const commands = [
+      `nvm install ${NODE_TARGET_VERSION}`,
+      `nvm alias default ${NODE_TARGET_VERSION}`,
+      `nvm use ${NODE_TARGET_VERSION}`
+    ];
+
+    for (const cmd of commands) {
+      execSync(`/bin/zsh -i -c "${cmd}"`, {
+        stdio: 'inherit'
+      });
+    }
+
+    console.log(`[npm] > Node.js ${NODE_TARGET_VERSION} installed and set as default`);
+    writeFileSync(NPM_NODE_MARKER, '');
+  } catch (error) {
+    console.error('[npm] ! Failed to install node.js via nvm:', error);
+    process.exit(1);
   }
 }
 
@@ -70,8 +125,12 @@ function updateGlobalNpm() {
       stdio: 'inherit'
     });
     console.log('[npm] > npm updated successfully');
+
+    writeFileSync(NPM_GLOBAL_MARKER, '');
+
   } catch (error) {
     console.error('[npm] ! Failed to update npm:', error);
+    process.exit(1);
   }
 }
 
@@ -115,7 +174,7 @@ function installGlobalPackages() {
   });
   console.log('[npm] > Global npm packages installed successfully');
 
-  writeFileSync(NPM_GLOBAL_MARKER, '');
+  writeFileSync(NPM_PACKAGES_MARKER, '');
 }
 
 // ===================== MAIN ====================
@@ -123,6 +182,7 @@ function installGlobalPackages() {
 if (!shouldSkipNpmInit()) {
   try {
     console.log('[npm] - Starting npm init script ...');
+    installNodeNvm();
     updateGlobalNpm();
     installGlobalPackages();
     console.log('[npm] - npm init script completed successfully');

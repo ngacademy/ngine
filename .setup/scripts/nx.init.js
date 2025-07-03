@@ -17,6 +17,7 @@ const DEBUG_MODE = Boolean(Number(process.env.DEBUG_MODE));
 const DEV_FLAG = Boolean(Number(process.env.DEV_FLAG));
 const WORKSPACE_NAME = "project";
 const WORKSPACE_DIR = path.join(ROOT_DIR, WORKSPACE_NAME);
+const HAS_WORKSPACE_DIR = existsSync(WORKSPACE_DIR) && readdirSync(WORKSPACE_DIR).length !== 0;
 
 const NX_CREATE_MARKER = path.join(ROOT_DIR, '.init', '.nx-create');
 const NX_JSON_MARKER = path.join(ROOT_DIR, '.init', '.nx-json');
@@ -28,8 +29,6 @@ const NX_MOVE_MARKER = path.join(ROOT_DIR, '.init', '.nx-move');
  * Checks if the whole nx init script should be skipped
  */
 function shouldSkipNxInit() {
-  const hasWorkspaceDir = existsSync(WORKSPACE_DIR);
-  const isWorkspaceDirEmpty = hasWorkspaceDir && readdirSync(WORKSPACE_DIR).length === 0;
   const nxJsonPath = path.join(ROOT_DIR, 'nx.json');
   const hasNxJson = existsSync(nxJsonPath);
 
@@ -37,7 +36,7 @@ function shouldSkipNxInit() {
     case shouldSkipNx:
       console.log('[nx] # Skipping nx init script due to shouldSkipNx setting');
       return true;
-    case DEBUG_MODE && hasWorkspaceDir && !isWorkspaceDirEmpty:
+    case DEBUG_MODE && HAS_WORKSPACE_DIR:
       console.log('[nx] # Skipping nx init script in debug mode since workspace directory already exists');
       return true;
     case hasNxJson:
@@ -54,8 +53,8 @@ function shouldSkipNxInit() {
  */
 function shouldCreateNxWorkspace() {
   switch (true) {
-    case DEV_FLAG:
-      console.log('[nx] ? dev flag detected');
+    case DEV_FLAG && HAS_WORKSPACE_DIR:
+      console.log('[nx] ? dev flag detected and workspace directory already exists');
       return false;
 
     default:
@@ -111,8 +110,8 @@ function createNxWorkspace() {
  */
 function shouldUpdateNxProjectJson() {
   switch (true) {
-    case DEV_FLAG:
-      console.log('[nx] ? dev flag detected');
+    case DEV_FLAG && HAS_WORKSPACE_DIR:
+      console.log('[nx] ? dev flag detected and workspace directory already exists');
       return false;
 
     default:

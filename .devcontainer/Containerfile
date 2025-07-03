@@ -23,6 +23,14 @@ ENV CLOUDSDK_PYTHON="/usr/bin/python3"
 RUN mkdir -p /home/node/.config/gcloud && \
     chown -R node:node /home/node/.config
 
+# ===================== BITWARDEN =====================
+
+RUN curl -LO https://github.com/bitwarden/sdk-sm/releases/download/bws-v1.0.0/bws-aarch64-unknown-linux-gnu-1.0.0.zip \
+    && unzip bws-aarch64-unknown-linux-gnu-1.0.0.zip \
+    && chmod +x bws \
+    && mv bws /usr/local/bin/ \
+    && rm bws-aarch64-unknown-linux-gnu-1.0.0.zip
+
 # ===================== SHELL PROMPT =====================
 
 # install starship
@@ -39,6 +47,3 @@ RUN chmod +x /ngine/deps.zsh
 
 COPY bin/init.zsh /ngine/init.zsh
 RUN chmod +x /ngine/init.zsh
-
-# experimental
-ENV NODE_VERSION=22.12.0

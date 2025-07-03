@@ -62,6 +62,9 @@ cp -r $ROOT_DIR/.setup/environment/starship.toml ~/.config/
 
 # ===================== JS/TS =====================
 
+sudo chown -R node:node /usr/local/share/nvm
+sudo chmod -R 755 /usr/local/share/nvm
+
 MSG="[init] Running main init script..."
 echo "$MSG" | tee -a .init/init.log
 node $ROOT_DIR/.setup/scripts/main.init.js
