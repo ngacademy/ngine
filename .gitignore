@@ -11,6 +11,9 @@ tmp
 .cursorignore
 .cursorrules
 
+# env
+.setup/environment/.env
+
 
 # to be enabled
 lib
