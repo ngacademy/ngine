@@ -24,7 +24,7 @@ cp -r /ngine/.devcontainer "$REPO_NAME/.devcontainer"
 mkdir -p "$REPO_NAME/.setup/configs"
 cp -r /ngine/.setup/scripts "$REPO_NAME/.setup/scripts"
 cp -r /ngine/.setup/environment "$REPO_NAME/.setup/environment"
-cp "$REPO_NAME/.setup/environment/.env.example" "$REPO_NAME/.setup/environment/.env"
+cp "$REPO_NAME/.setup/environment/.env" "$REPO_NAME/.env"
 
 # Update docker-compose.yml workspace path to use the new repo name
 DOCKER_COMPOSE="$REPO_NAME/.devcontainer/docker-compose.yml"

@@ -12,7 +12,7 @@ tmp
 .cursorrules
 
 # env
-.setup/environment/.env
+.env
 
 
 # to be enabled

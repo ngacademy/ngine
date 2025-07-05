@@ -6,4 +6,4 @@ services:
       dockerfile: Containerfile
     volumes:
       - ../:/workspaces/ngine:cached
-    env_file: ../.setup/environment/.env
+    env_file: ../.env
